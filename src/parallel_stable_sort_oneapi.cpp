@@ -4,6 +4,10 @@
 // SPDX-License-Identifier: MIT
 // =============================================================
 
+#include <oneapi/dpl/execution>
+#include <oneapi/dpl/algorithm>
+#include <dpct/dpl_extras/iterators.h>
+
 #define TBB_PREVIEW_GLOBAL_CONTROL 1
 #include "tbb/global_control.h"
 
@@ -12,10 +16,6 @@
 #if FPGA || FEMU
 #include <CL/sycl/INTEL/fpga_extensions.hpp>
 #endif
-
-#include <oneapi/dpl/execution>
-#include <oneapi/dpl/algorithm>
-#include <dpct/dpl_extras/iterators.h>
 
 #include <ctime>
 #include <deque>

@@ -1,3 +1,7 @@
+#include <oneapi/dpl/execution>
+#include <oneapi/dpl/algorithm>
+#include <dpct/dpl_extras/iterators.h>
+
 #include <tbb/tbb.h>
 #include <tbb/task.h>
 
@@ -5,12 +9,6 @@
 #if FPGA || FEMU
 #include <CL/sycl/INTEL/fpga_extensions.hpp>
 #endif
-
-#include <oneapi/dpl/execution>
-#include <oneapi/dpl/algorithm>
-#include <dpct/dpl_extras/iterators.h>
-
-#include <iostream>
 
 #include "misc/utility.hpp"
 
