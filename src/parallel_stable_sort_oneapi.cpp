@@ -4,15 +4,18 @@
 // SPDX-License-Identifier: MIT
 // =============================================================
 
+#include <oneapi/dpl/execution>
+#include <oneapi/dpl/algorithm>
+#include <dpct/dpl_extras/iterators.h>
+
+#define TBB_PREVIEW_GLOBAL_CONTROL 1
+#include "tbb/global_control.h"
+
 #include <CL/sycl.hpp>
 
 #if FPGA || FEMU
-#include <CL/sycl/intel/fpga_extensions.hpp>
+#include <CL/sycl/INTEL/fpga_extensions.hpp>
 #endif
-
-#include <dpstd/execution>
-#include <dpstd/algorithm>
-#include <dpstd/iterators.h>
 
 #include <ctime>
 #include <deque>
@@ -179,13 +182,13 @@ int main()
 	std::cout << logo << "\n\n";
 
 #if FEMU
-    sycl::intel::fpga_emulator_selector device_selector{};
+    INTEL::fpga_emulator_selector device_selector{};
 #elif CPU
 	cpu_selector device_selector{};
 #elif GPU
 	gpu_selector device_selector{};
 #elif FPGA
-	sycl::intel::fpga_selector device_selector{};
+	INTEL::fpga_selector device_selector{};
 #else 
 	default_selector device_selector{};
 #endif
@@ -199,6 +202,8 @@ int main()
         << " @ " << device_queue.get_device().get_info<info::device::max_clock_frequency>() << "Mhz (" << \ 
             device_queue.get_device().get_info<info::device::max_compute_units>() << " cores)" << std::endl;
 #endif
+
+	tbb::global_control c(tbb::global_control::max_allowed_parallelism, misc::n_tbb_workers);
 
 	char option = '\0';
 	std::cout << "\nDo you want to run stress test first [Y/N]?"; std::cin >> option;

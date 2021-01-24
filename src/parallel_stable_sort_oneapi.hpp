@@ -1,16 +1,14 @@
+#include <oneapi/dpl/execution>
+#include <oneapi/dpl/algorithm>
+#include <dpct/dpl_extras/iterators.h>
+
 #include <tbb/tbb.h>
 #include <tbb/task.h>
 
 #include <CL/sycl.hpp>
 #if FPGA || FEMU
-#include <CL/sycl/intel/fpga_extensions.hpp>
+#include <CL/sycl/INTEL/fpga_extensions.hpp>
 #endif
-
-#include <dpstd/execution>
-#include <dpstd/algorithm>
-#include <dpstd/iterators.h>
-
-#include <iostream>
 
 #include "misc/utility.hpp"
 
@@ -18,7 +16,7 @@
 #define PARALLEL_SORT_STL_H
 
 using namespace cl::sycl;
-using namespace dpstd::execution;
+using namespace oneapi::dpl::execution;
 
 namespace internal
 {
@@ -128,13 +126,8 @@ namespace internal
 
         pv_dd.reserve(array_dd.size() + 1); pv_dd.resize(array_dd.size() + 1);
 #elif FPGA | GPU       
-        cl::sycl::usm_allocator<gen::ITEM, usm::alloc::device> q_array_alloc{ device_queue };      
-        cl::sycl::usm_allocator<std::size_t, usm::alloc::device> q_pv_alloc{ device_queue };      
-
-        std::vector<std::size_t, usm_allocator<std::size_t, usm::alloc::device>> pv_dd(q_pv_alloc);
-        std::vector<gen::ITEM, usm_allocator<gen::ITEM, usm::alloc::device>> array_dd(q_array_alloc);
-        
-        array_dd.reserve(array.size()); pv_dd.reserve(array.size() + 1);
+        gen::ITEM* array_dd = (gen::ITEM*)sycl::malloc_device( array.size()*sizeof(gen::ITEM), device_queue );
+        std::size_t* pv_dd = (std::size_t*)sycl::malloc_device( (array.size() + 1)*sizeof(std::size_t), device_queue );
         
         device_queue.memset(&pv_dd[0], 0x00, sizeof(std::size_t) * (array.size() + 1));
         device_queue.wait_and_throw();
@@ -182,7 +175,7 @@ namespace internal
 #if FPGA | CPU | GPU
         auto policy = make_device_policy(device_queue);
 #elif FEMU
-        auto policy = dpstd::execution::par_unseq;
+        auto policy = oneapi::dpl::execution::par_unseq;
 #endif
 
 #if FEMU | CPU
@@ -233,6 +226,9 @@ namespace internal
             array.resize(array_dd.size()); 
             array.assign(array_dd.begin(), array_dd.end());
         }
+#elif FPGA | GPU
+        free(array_dd, device_queue);
+        free(pv_dd, device_queue);
 #endif
     }
 
