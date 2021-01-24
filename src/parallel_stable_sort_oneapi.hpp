@@ -226,6 +226,9 @@ namespace internal
             array.resize(array_dd.size()); 
             array.assign(array_dd.begin(), array_dd.end());
         }
+#elif FPGA | GPU
+        free(array_dd, device_queue);
+        free(pv_dd, device_queue);
 #endif
     }
 
